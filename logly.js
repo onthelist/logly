@@ -1,4 +1,5 @@
 var fs = require( 'fs' );
+var os = require( 'os' );
 
 exports.version =
   JSON.parse( fs.readFileSync( __dirname + '/package.json' ) ).version;
@@ -11,14 +12,24 @@ var mode = {};
 name[ process.pid ] = 'logly';
 mode[ process.pid ] = 'standard';
 
+var get_time = function(){
+  return (new Date).toJSON();
+};
+
+var HOST = os.hostname();
+
+var format_message = function(mode, msg){
+  return '[' + get_time() + ']@' + HOST + ' ' + mode  + ': ' + msg;
+};
+
 var logger = function( input, methodMode ) {
   if ( typeof( input ) === "string" ) {
     if ( methodMode == 'error' || methodMode == 'warn' ) {
-      console.error( name[ process.pid ] + '[' + methodMode + ']: ' + input );
+      console.error(format_message(methodMode, input));
     } else if ( methodMode != 'standard' ) {
-      console.log( name[ process.pid ] + '[' + methodMode + ']: ' + input );
+      console.log(format_message(methodMode, input));
     } else {
-      console.log( name[ process.pid ] + ': ' + input );
+      console.log(format_message('info', input));
     }
   } else if ( typeof( input ) === "function" ) {
     input();
